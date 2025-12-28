@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="stylesheet.css">
+        <title>Mind Your Money</title>
+        <link rel="icon" type="image/x-icon" href="paws.png">
+    </head>
+
+    <body>
+        <h1>Virtupals</h1>
+
+        <!---------------------------------- PLAY SCREEN -------------------------------->
+        <section id="play">
+            <button id="playButton" href="#input">play</button>
+        </section>
+        
+        <!---------------------------------- USER INPUTS -------------------------------->
+        <section id="input" class="hide">
+            <div id="inputContainer">
+                <h2>Create Your Pet</h2>
+
+                <!--------------------------- USER NAME INPUT -------------------------->
+                <div class="userNameContainer">
+                    Your name:
+                    <input id="userName" type="text" placeholder="enter your name"/>
+                </div>
+
+                <!-------------------------- PET NAME INPUT ------------------------>
+                <div class="petNameContainer">
+                    Pet name:
+                    <input id="petName" type="text" placeholder="enter pet name"/>
+                </div>
+
+                <!---------------------------- PET TYPE INPUT ------------------------->
+                <div class="petTypeContainer">
+                    Pet type:
+                    <select id="petType">
+                        <option>Dog</option>
+                        <option>Cat</option>
+                        <option>Rabbit</option>
+                        <option>Turtle</option>
+                        <option>Bird</option>
+                    </select>
+                </div>
+
+                <!----------------------- HOW MUCH USER WANTS TO SAVE ---------------------->
+                <div class="savingsContainer">
+                    Savings Goal:
+                    <input id="savingsGoal" type="number" placeholder="enter goal (USD)">
+                </div>
+
+                <button id="submitInputs">submit & play</button>
+            </div>
+
+        </section>
+
+        <section id="game" class="hide">
+            <h2 id="userNameDisplay"></h2>
+            <div id="gameContainer">
+                <div id="stats">
+                    <h3>Pet Stats</h3>
+                    <p id="hungerStats">Hunger:</p>
+                    <p id="happinessStats">Happiness:</p>
+                    <p id="energyStats">Energy:</p>
+                    <p id="cleanlinessStats">Cleanliness:</p>
+                    <p id="healthStats">Health:</p>
+                    <p id="ageStats">Age:</p>
+                </div>
+
+                <div id="money">
+                    <h3>Money</h3>
+                    <p id="moneySaved"></p>
+                    <p id="goal"></p>
+                </div>
+
+                <div id="petDisplay">
+                    <h3 id="petNameDisplay"></h3>
+                    <p>there will be an image down here</p>
+                </div>
+
+                <div id="actions">
+                    <h3>Actions</h3>
+                    <button id="feedBtn">Feed ($5)</button>
+                    <button id="playBtn">Play ($2)</button>
+                    <button id="restBtn">Rest (Free)</button>
+                    <button id="cleanBtn">Clean ($2)</button>
+                    <button id="vetBtn">Vet Visit ($20)</button>
+                    <button id="choresBtn"> Chores (+$10)</button>
+                </div>
+
+                <div id="log">
+                    <h3>Activity Log</h3>
+                    <div id="logArea"></div>
+                </div>
+            </div>
+        </section>
+        <script src="main.js"></script>
+    </body>
+</html>

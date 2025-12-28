@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Parkinsans:wght@300..800&display=swap');
+/* ------ COLOR PALLETTE (COPY AND PASTE WHEN NEEDED) ---------
+sage: #c3c88c
+ink black: #030d14
+navy: #0b2538
+cambridge blue: #94c7b4
+light blue: #daf5ff
+
+----------- GENERAL DOCUMENT STYLING -----------*/
+*{
+    font-family: "Parkinsans", sans-serif;
+    font-weight: 450;
+    color: #030d14;
+}
+
+body {
+    background-color: aliceblue;
+    height: 100vh;
+}
+
+button, input, select{
+    background-color: white;
+    border: 1px, solid, #0b2538;
+    border-radius: 5px;
+}
+
+button {
+    padding: 5px;
+    transition: 0.2s;
+    text-align: center;
+}
+
+button:hover{
+    background-color: rgb(221, 221, 221);
+    cursor: pointer;
+}
+
+input::placeholder{
+    color:rgb(196, 214, 229);
+}
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: inline;
+}
+/*--------------------------------------------------- START SCREEN --------------------------------------------*/
+
+h1{
+    text-align: center;
+}
+
+#playButton {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    transform: translate(-50%, -50%);
+    font-size: 25px;
+}
+#play button:hover{
+    font-size: 30px;
+}
+
+/*----------------------------------------------------- USER INPUT -------------------------------------------*/
+#inputContainer{
+    background-color: white;
+    border: 1px, solid, #0b2538;
+    padding: 10px;
+    border-radius: 5px;
+    width: 300px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+#inputContainer h2 {
+    margin: 0;
+    text-align: center;
+}
+
+#inputContainer div{
+    margin: 10px 0;
+}
+
+#inputContainer input, #inputContainer select {
+    float: right;
+    box-sizing: border-box;
+    width: 135px;
+}
+
+#inputContainer button {
+    display: block;
+    margin: 0 auto;
+}
+
+#submitInputs:hover {
+    font-size: 17px;
+}
+
+/*----------------------------------------------------- GAME -------------------------------------------------*/
+
+#gameContainer {
+    width: 1425px;
+    height: 350px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 280px 280px 280px 280px 280px;
+    grid-template-rows: 350px;
+    border-radius: 25px;
+}
+
+#gameContainer div {
+    border-radius: 20px;
+    margin: 0 5px;
+    background-color: white;
+    padding: 0 5px;
+}
+#gameContainer div h3, #userNameDisplay {
+    text-align: center;
+    margin-top: 10px;
+}
+
+#gameContainer #stats {
+    grid-column: 1/2;
+    grid-row: 1/2;
+}
+
+#gameContainer #money {
+    grid-column: 2/3;
+    grid-row: 1/2;
+}
+
+#gameContainer #petDisplay {
+    grid-column: 3/4;
+    grid-row: 1/2;
+}
+
+#gameContainer #actions {
+    grid-column: 4/5;
+    grid-row: 1/2;
+}
+
+#gameContainer #actions button {
+    display: block;
+    margin: 5px auto;
+    width: 95px;
+}
+#gameContainer #log {
+    grid-column: 5/6;
+    grid-row: 1/2;
+}
+
+#logArea{
+    height: 275px;
+    overflow-y:auto;
+    text-align:left;
+    padding:10px;
+    border:1px solid #ccc;
+    background:#fafafa;
+    border-radius:6px;
+}
+

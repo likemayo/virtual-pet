@@ -45,14 +45,84 @@ document.addEventListener('DOMContentLoaded', function() {
         input.classList.add('show');
     };
 
+    // Validation helpers and submit handling
+    function showError(inputElement, errorElement, message) {
+        inputElement.classList.add('error');
+        errorElement.textContent = message;
+    }
+
+    function clearError(inputElement, errorElement) {
+        inputElement.classList.remove('error');
+        errorElement.textContent = '';
+    }
+
+    function validateInputs() {
+        const userNameError = document.getElementById('userNameError');
+        const petNameError = document.getElementById('petNameError');
+        const petTypeError = document.getElementById('petTypeError');
+        const savingsGoalError = document.getElementById('savingsGoalError');
+
+        // Clear previous errors
+        clearError(userName, userNameError);
+        clearError(petName, petNameError);
+        clearError(petType, petTypeError);
+        clearError(savingsGoal, savingsGoalError);
+
+        let isValid = true;
+
+        const nameVal = userName.value.trim();
+        if (nameVal === '') {
+            showError(userName, userNameError, 'Name is required');
+            isValid = false;
+        } else if (nameVal.length > 24) {
+            showError(userName, userNameError, 'Name must be 24 characters or less');
+            isValid = false;
+        }
+
+        const petVal = petName.value.trim();
+        if (petVal === '') {
+            showError(petName, petNameError, 'Pet name is required');
+            isValid = false;
+        } else if (petVal.length > 24) {
+            showError(petName, petNameError, 'Pet name must be 24 characters or less');
+            isValid = false;
+        }
+
+        if (petType.value === '') {
+            showError(petType, petTypeError, 'Please select a pet type');
+            isValid = false;
+        }
+
+        const goalVal = parseFloat(savingsGoal.value);
+        if (savingsGoal.value === '' || isNaN(goalVal)) {
+            showError(savingsGoal, savingsGoalError, 'Savings goal must be a number');
+            isValid = false;
+        } else if (goalVal < 1) {
+            showError(savingsGoal, savingsGoalError, 'Goal must be at least $1');
+            isValid = false;
+        } else if (goalVal > 1000000) {
+            showError(savingsGoal, savingsGoalError, 'Goal must be less than $1,000,000');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
     submitInputs.onclick = function() {
-        userNameDisplay.textContent = "Hello, " + userName.value;
-        petNameDisplay.textContent = petName.value;
+        if (!validateInputs()) {
+            // Focus the first invalid field for convenience
+            const invalid = document.querySelector('.error');
+            if (invalid) invalid.focus();
+            return;
+        }
 
-        percent = money / parseInt(savingsGoal.value) * 100;
+        userNameDisplay.textContent = "Hello, " + userName.value.trim();
+        petNameDisplay.textContent = petName.value.trim();
 
+        let percent = Math.floor((money / parseFloat(savingsGoal.value)) * 100);
         moneySaved.textContent = "Money saved: $" + money;
         goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
+
         input.classList.remove('show');
         input.classList.add('hide');
         game.classList.remove('hide');

@@ -25,30 +25,35 @@
                 <div class="userNameContainer">
                     Your name:
                     <input id="userName" type="text" placeholder="enter your name"/>
+                    <span class="error-msg" id="userNameError"></span>
                 </div>
 
                 <!-------------------------- PET NAME INPUT ------------------------>
                 <div class="petNameContainer">
                     Pet name:
                     <input id="petName" type="text" placeholder="enter pet name"/>
+                    <span class="error-msg" id="petNameError"></span>
                 </div>
 
                 <!---------------------------- PET TYPE INPUT ------------------------->
                 <div class="petTypeContainer">
                     Pet type:
                     <select id="petType">
+                        <option value="">Select a pet</option>
                         <option>Dog</option>
                         <option>Cat</option>
                         <option>Rabbit</option>
                         <option>Turtle</option>
                         <option>Bird</option>
                     </select>
+                    <span class="error-msg" id="petTypeError"></span>
                 </div>
 
                 <!----------------------- HOW MUCH USER WANTS TO SAVE ---------------------->
                 <div class="savingsContainer">
                     Savings Goal:
                     <input id="savingsGoal" type="number" placeholder="enter goal (USD)">
+                    <span class="error-msg" id="savingsGoalError"></span>
                 </div>
 
                 <button id="submitInputs">submit & play</button>

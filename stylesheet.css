@@ -20,7 +20,7 @@ body {
 
 button, input, select{
     background-color: white;
-    border: 1px, solid, #0b2538;
+    border: 1px solid #0b2538;
     border-radius: 5px;
 }
 
@@ -39,12 +39,25 @@ input::placeholder{
     color:rgb(196, 214, 229);
 }
 
+/* Input validation: error styling */
+.error {
+    border: 1px solid #d33;
+}
+
+.error-msg {
+    display: block;
+    color: #d33;
+    font-size: 12px;
+    min-height: 14px;
+    margin-top: 2px;
+}
+
 .hide {
     display: none;
 }
 
 .show {
-    display: inline;
+    display: block;
 }
 /*--------------------------------------------------- START SCREEN --------------------------------------------*/
 
@@ -66,7 +79,7 @@ h1{
 /*----------------------------------------------------- USER INPUT -------------------------------------------*/
 #inputContainer{
     background-color: white;
-    border: 1px, solid, #0b2538;
+    border: 1px solid #0b2538;
     padding: 10px;
     border-radius: 5px;
     width: 300px;

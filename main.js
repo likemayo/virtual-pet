@@ -37,13 +37,53 @@ let petNameDisplay = document.getElementById("petNameDisplay");
 let moneySaved = document.getElementById("moneySaved");
 let goal = document.getElementById("goal");
 
+// Pet emoji map by type
+const petEmojis = {
+    'Dog': '🐕',
+    'Cat': '🐈',
+    'Rabbit': '🐰',
+    'Turtle': '🐢',
+    'Bird': '🐦'
+};
+
 let money = 10;
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     playButton.onclick = function() {
         play.classList.add('hide');
         input.classList.remove('hide');
         input.classList.add('show');
     };
+
+    // Try to load saved game state and optionally resume
+    const savedState = loadGame();
+    if (savedState) {
+        const continueGame = confirm('Found a saved game! Continue where you left off?');
+        if (continueGame) {
+            applyLoadedState(savedState);
+
+            // Show game screen
+            play.classList.add('hide');
+            input.classList.add('hide');
+            game.classList.remove('hide');
+            game.classList.add('show');
+
+            // Update headers from restored inputs
+            userNameDisplay.textContent = "Hello, " + (userName.value || '').trim();
+            petNameDisplay.textContent = (petName.value || '').trim();
+
+            // Refresh stats and reaction
+            updateStats();
+        } else {
+            // Ensure inputs remain blank when not continuing
+            userName.value = '';
+            petName.value = '';
+            petType.value = '';
+            savingsGoal.value = '';
+        }
+    }
 
     // Validation helpers and submit handling
     function showError(inputElement, errorElement, message) {
@@ -134,6 +174,21 @@ document.addEventListener('DOMContentLoaded', function() {
         cleanlinessStats.textContent = "Cleanliness: " + cleanliness + "%";
         healthStats.textContent = "Health: " + health + "%";
         ageStats.textContent = "Age: " + age + " years";
+
+        updatePetReaction();
+
+        // Save initial state after starting the game
+        saveGame();
+
+        // Start passive decay timer every 5 seconds
+        const decayInterval = setInterval(applyPassiveDecay, 5000);
+        window.gameDecayInterval = decayInterval;
+    }
+
+    // Wire up reset button
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+        resetBtn.onclick = resetGame;
     }
 
 });
@@ -147,13 +202,196 @@ let choresBtn = document.getElementById("choresBtn");
 
 let logArea = document.getElementById("logArea");
 
+// ----------------------------- PERSISTENCE (localStorage) -----------------------
+function saveGame() {
+    const gameState = {
+        userName: userName.value,
+        petName: petName.value,
+        petType: petType.value,
+        savingsGoal: savingsGoal.value,
+        money: money,
+        hunger: hunger,
+        happiness: happiness,
+        energy: energy,
+        cleanliness: cleanliness,
+        health: health,
+        age: age
+    };
+    try {
+        localStorage.setItem('petGameState', JSON.stringify(gameState));
+    } catch (e) {
+        console.warn('Could not save game state:', e);
+    }
+}
+
+// Load WITHOUT applying; return parsed state or null
+function loadGame() {
+    try {
+        const raw = localStorage.getItem('petGameState');
+        if (!raw) return null;
+        return JSON.parse(raw);
+    } catch (e) {
+        console.warn('Could not load game state:', e);
+        return null;
+    }
+}
+
+// Reset the game to initial state and clear persistence
+function resetGame() {
+    const sure = confirm('Reset the game and delete saved progress?');
+    if (!sure) return;
+
+    // 1) Remove saved state so resume prompt won’t appear
+    try { localStorage.removeItem('petGameState'); } catch (_) {}
+
+    // 2) Reset stats to initial values
+    money = 10;
+    hunger = 0;
+    happiness = 100;
+    energy = 100;
+    cleanliness = 100;
+    health = 100;
+    age = 0;
+
+    // 3) Clear inputs
+    userName.value = '';
+    petName.value = '';
+    petType.value = '';
+    savingsGoal.value = '';
+
+    // 4) Clear validation UI (if any)
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.error-msg').forEach(el => el.textContent = '');
+
+    // 5) Clear log and reset dynamic button labels if needed
+    if (logArea) logArea.innerHTML = '';
+    if (typeof choresBtn !== 'undefined' && choresBtn) {
+        choresBtn.disabled = false;
+        choresBtn.textContent = 'Chores (+$10)';
+    }
+
+    // Optionally reset reaction panel visuals
+    const petReactionDiv = document.getElementById('petReaction');
+    if (petReactionDiv) {
+        petReactionDiv.className = '';
+        const petEmojiEl = document.getElementById('petEmoji');
+        const emotionEmojiEl = document.getElementById('emotionEmoji');
+        const petTypeDisplay = document.getElementById('petTypeDisplay');
+        const petStatusEl = document.getElementById('petStatus');
+        if (petEmojiEl) petEmojiEl.textContent = '🐾';
+        if (emotionEmojiEl) emotionEmojiEl.textContent = '🙂';
+        if (petTypeDisplay) petTypeDisplay.textContent = '';
+        if (petStatusEl) petStatusEl.textContent = 'Your pet is okay.';
+    }
+
+    // 6) Switch screens: hide game, show start screen
+    game.classList.remove('show'); game.classList.add('hide');
+    input.classList.remove('show'); input.classList.add('hide');
+    play.classList.remove('hide');
+    
+    // Stop decay timer if running
+    if (window.gameDecayInterval) {
+        clearInterval(window.gameDecayInterval);
+        window.gameDecayInterval = null;
+    }
+}
+
+// ----------------------------- PASSIVE STAT DECAY -----------------------
+function applyPassiveDecay() {
+    // Hunger increases naturally over time (pet gets hungrier)
+    hunger = Math.min(100, hunger + 2);
+
+    // Energy slightly decreases (pet gets tired)
+    energy = Math.max(0, energy - 1);
+
+    // Happiness slightly decreases if not interacting (pet gets bored)
+    happiness = Math.max(0, happiness - 1);
+
+    // Cleanliness decreases slowly (pet gets dirty)
+    cleanliness = Math.max(0, cleanliness - 0.5);
+
+    // Health decreases if conditions are bad (consequences for neglect)
+    if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
+        health = Math.max(0, health - 3);
+    }
+
+    // Update UI and check emotions
+    updateStats();
+}
+
+// Apply a previously loaded state to inputs and stats
+function applyLoadedState(s) {
+    // Inputs
+    userName.value = s.userName || '';
+    petName.value = s.petName || '';
+    petType.value = s.petType || '';
+    savingsGoal.value = s.savingsGoal || '';
+
+    // Stats
+    money = typeof s.money === 'number' ? s.money : 10;
+    hunger = typeof s.hunger === 'number' ? s.hunger : 0;
+    happiness = typeof s.happiness === 'number' ? s.happiness : 100;
+    energy = typeof s.energy === 'number' ? s.energy : 100;
+    cleanliness = typeof s.cleanliness === 'number' ? s.cleanliness : 100;
+    health = typeof s.health === 'number' ? s.health : 100;
+    age = typeof s.age === 'number' ? s.age : 0;
+}
+
+// -------------------------------------- PET REACTIONS -----------------------------------
+function getPetEmotion() {
+    if (health <= 30) {
+        return { emotion: 'sick', emoji: '🤒', status: 'Your pet is very sick!' };
+    }
+    if (hunger >= 80) {
+        return { emotion: 'hungry', emoji: '😫', status: 'Your pet is starving!' };
+    }
+    if (energy <= 20) {
+        return { emotion: 'tired', emoji: '😴', status: 'Your pet is exhausted.' };
+    }
+    if (happiness <= 40 || health <= 40) {
+        return { emotion: 'sad', emoji: '😢', status: 'Your pet is sad.' };
+    }
+    if (energy >= 85 && happiness >= 75) {
+        return { emotion: 'energetic', emoji: '🤩', status: 'Your pet is full of energy!' };
+    }
+    if (happiness >= 80 && energy >= 70 && hunger <= 30) {
+        return { emotion: 'happy', emoji: '😊', status: 'Your pet is very happy!' };
+    }
+    return { emotion: 'neutral', emoji: '🙂', status: 'Your pet is okay.' };
+}
+
+function updatePetReaction() {
+    const petReactionDiv = document.getElementById('petReaction');
+    const petEmojiEl = document.getElementById('petEmoji');
+    const emotionEmojiEl = document.getElementById('emotionEmoji');
+    const petTypeDisplay = document.getElementById('petTypeDisplay');
+    const petStatusEl = document.getElementById('petStatus');
+
+    if (!petReactionDiv) return;
+
+    const reaction = getPetEmotion();
+
+    // Set pet type emoji (big)
+    petEmojiEl.textContent = petEmojis[petType.value] || '🐾';
+    // Set emotion emoji (badge)
+    emotionEmojiEl.textContent = reaction.emoji;
+    // Set pet type text
+    petTypeDisplay.textContent = petType.value;
+    // Set status message
+    petStatusEl.textContent = reaction.status;
+
+    // Reset and apply emotion class for background color
+    petReactionDiv.className = '';
+    petReactionDiv.classList.add(reaction.emotion);
+}
+
 // ----------------------------- UPDATE ALL STATS ON SCREEN -----------------------
 
 function updateStats() {
     hungerStats.textContent = "Hunger: " + hunger + "%";
     happinessStats.textContent = "Happiness: " + happiness + "%";
-    energyStats.textContent = "Energy: " + cleanliness + "%";
-    cleanlinessStats.textContent = "Cleanliness: " + energy + "%";
+    energyStats.textContent = "Energy: " + energy + "%";
+    cleanlinessStats.textContent = "Cleanliness: " + cleanliness + "%";
     healthStats.textContent = "Health: " + health + "%";
     ageStats.textContent = "Age: " + age + " years";
     
@@ -161,6 +399,11 @@ function updateStats() {
     let percent = Math.floor((money / parseInt(savingsGoal.value)) * 100);
     moneySaved.textContent = "money saved: $" + money;
     goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
+
+    updatePetReaction();
+
+    // Persist state after each stats refresh
+    saveGame();
 }
 
 function log(message) {
@@ -181,7 +424,6 @@ feedBtn.onclick = function() {
     } else {
         log("Not enough money to feed your pet.");
     }
-
     updateStats();
 };
 
@@ -225,7 +467,6 @@ vetBtn.onclick = function() {
         log("You visited the vet. - $20");
     } else {
         log("Not enough money for a vet visit");
-
     }
 
     updateStats();

@@ -64,6 +64,7 @@
         <section id="game" class="hide">
             <h2 id="userNameDisplay"></h2>
             <button id="resetBtn" title="Reset and start over">Reset Game</button>
+            <button id="viewReportBtn">View Budget Report</button>
             <div id="gameContainer">
                 <div id="stats">
                     <h3>Pet Stats</h3>
@@ -104,6 +105,52 @@
                 <div id="log">
                     <h3>Activity Log</h3>
                     <div id="logArea"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Budget Report Section -->
+        <section id="report" class="hide">
+            <h2>Budget Report</h2>
+            <button id="backToGameBtn">Back to Game</button>
+            
+            <div id="reportContainer">
+                <div class="report-summary">
+                    <h3>Expense Summary</h3>
+                    <p id="totalSpent">Total Spent: $0</p>
+                    <p id="totalEarned">Total Earned: $<span id="earnedAmount">0</span></p>
+                </div>
+
+                <div class="report-category">
+                    <h4>Food</h4>
+                    <div class="bar-container">
+                        <div class="bar" id="foodBar" style="width: 0%;"></div>
+                    </div>
+                    <p><span id="foodAmount">$0</span> (<span id="foodPercent">0</span>%)</p>
+                </div>
+
+                <div class="report-category">
+                    <h4>Healthcare</h4>
+                    <div class="bar-container">
+                        <div class="bar" id="healthcareBar" style="width: 0%;"></div>
+                    </div>
+                    <p><span id="healthcareAmount">$0</span> (<span id="healthcarePercent">0</span>%)</p>
+                </div>
+
+                <div class="report-category">
+                    <h4>Hygiene</h4>
+                    <div class="bar-container">
+                        <div class="bar" id="hygieneBar" style="width: 0%;"></div>
+                    </div>
+                    <p><span id="hygieneAmount">$0</span> (<span id="hygienePercent">0</span>%)</p>
+                </div>
+
+                <div class="report-category">
+                    <h4>Entertainment</h4>
+                    <div class="bar-container">
+                        <div class="bar" id="entertainmentBar" style="width: 0%;"></div>
+                    </div>
+                    <p><span id="entertainmentAmount">$0</span> (<span id="entertainmentPercent">0</span>%)</p>
                 </div>
             </div>
         </section>

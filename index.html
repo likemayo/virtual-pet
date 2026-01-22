@@ -14,6 +14,55 @@
         <!---------------------------------- PLAY SCREEN -------------------------------->
         <section id="play">
             <button id="playButton" href="#input">play</button>
+            <button id="helpFromPlayBtn" title="View help">❓ Help</button>
+        </section>
+
+        <!---------------------------------- HELP SCREEN -------------------------------->
+        <section id="help" class="hide">
+            <div id="helpContainer">
+                <button id="closeHelpBtn" title="Close help">← Back</button>
+                <h2>How to Play - Virtupals</h2>
+                
+                <h3>📋 Objective</h3>
+                <p>Take care of your virtual pet while saving money towards your goal. Balance your pet's needs with your budget!</p>
+                
+                <h3>🎮 Basic Actions</h3>
+                <ul>
+                    <li><strong>Feed</strong> - Reduces hunger ($5 per meal)</li>
+                    <li><strong>Play</strong> - Increases happiness ($1 per play session)</li>
+                    <li><strong>Rest</strong> - Restores energy (free)</li>
+                    <li><strong>Clean</strong> - Improves cleanliness ($1 per wash)</li>
+                    <li><strong>Vet</strong> - Heals your pet ($5 per visit)</li>
+                    <li><strong>Chores</strong> - Earn money ($2 per chore)</li>
+                </ul>
+                
+                <h3>📊 Understanding Stats</h3>
+                <ul>
+                    <li><strong>Hunger</strong> - Increases over time. Feed your pet when high!</li>
+                    <li><strong>Energy</strong> - Depletes naturally. Let pet rest to recover.</li>
+                    <li><strong>Happiness</strong> - Decreases without interaction. Play with your pet!</li>
+                    <li><strong>Cleanliness</strong> - Gets dirty over time. Keep pet clean.</li>
+                    <li><strong>Health</strong> - Suffers if pet is neglected. Visit vet if low!</li>
+                    <li><strong>Age</strong> - Increases every 5 seconds. Pet evolves through life stages.</li>
+                </ul>
+                
+                <h3>💡 Pro Tips</h3>
+                <ul>
+                    <li>Do chores regularly to earn money for your goal</li>
+                    <li>Watch your pet's emotion - it tells you what they need</li>
+                    <li>Different difficulty levels change how fast stats degrade</li>
+                    <li>Your pet changes appearance as it ages (Baby → Young → Adult → Senior)</li>
+                    <li>If health drops too low AND pet gets very old, they may pass away</li>
+                    <li>Check Budget Report to track spending by category</li>
+                </ul>
+                
+                <h3>⚙️ Difficulty Levels</h3>
+                <ul>
+                    <li><strong>Easy</strong> - Stats degrade slowly, more time to react</li>
+                    <li><strong>Normal</strong> - Balanced challenge (recommended for beginners)</li>
+                    <li><strong>Hard</strong> - Stats degrade fast, requires constant attention</li>
+                </ul>
+            </div>
         </section>
         
         <!---------------------------------- USER INPUTS -------------------------------->
@@ -56,6 +105,16 @@
                     <span class="error-msg" id="savingsGoalError"></span>
                 </div>
 
+                <!--------------------------- DIFFICULTY SELECTOR ------------------------->
+                <div class="difficultyContainer">
+                    Difficulty:
+                    <select id="difficulty" required>
+                        <option value="easy">Easy - Stats degrade slowly</option>
+                        <option value="normal" selected>Normal - Balanced challenge</option>
+                        <option value="hard">Hard - Stats degrade fast</option>
+                    </select>
+                </div>
+
                 <button id="submitInputs">submit & play</button>
             </div>
 
@@ -64,6 +123,7 @@
         <section id="game" class="hide">
             <h2 id="userNameDisplay"></h2>
             <button id="resetBtn" title="Reset and start over">Reset Game</button>
+            <button id="helpFromGameBtn" title="View help">❓ Help</button>
             <button id="viewReportBtn">View Budget Report</button>
             <div id="gameContainer">
                 <div id="stats">

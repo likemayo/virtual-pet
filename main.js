@@ -46,6 +46,92 @@ const petEmojis = {
     'Bird': '🐦'
 };
 
+// ========================= AGING SYSTEM =========================
+// Step 1: Define Life Stages
+const petLifeStages = {
+    baby: { min: 0, max: 4, label: 'Baby' },
+    young: { min: 5, max: 9, label: 'Young' },
+    adult: { min: 10, max: 19, label: 'Adult' },
+    senior: { min: 20, max: 100, label: 'Senior' }
+};
+
+function getPetLifeStage() {
+    for (const [key, stage] of Object.entries(petLifeStages)) {
+        if (age >= stage.min && age <= stage.max) {
+            return stage;
+        }
+    }
+    return petLifeStages.adult;
+}
+
+// Step 2: Pet Type-Specific Emojis for Each Life Stage
+const petStageEmojis = {
+    'Dog': {
+        'Baby': 'images/pets/dog-baby.png',
+        'Young': 'images/pets/dog-young.png',
+        'Adult': 'images/pets/dog-adult.png',
+        'Senior': 'images/pets/dog-senior.png'
+    },
+    'Cat': {
+        'Baby': '🐱',
+        'Young': '🐈',
+        'Adult': '🐈‍⬛',
+        'Senior': '🐈'
+    },
+    'Rabbit': {
+        'Baby': '🐰',
+        'Young': '🐇',
+        'Adult': '🐰',
+        'Senior': '🐇'
+    },
+    'Turtle': {
+        'Baby': '🥚',
+        'Young': '🐢',
+        'Adult': '🐢',
+        'Senior': '🐢'
+    },
+    'Bird': {
+        'Baby': '🐣',
+        'Young': '🐦',
+        'Adult': '🦅',
+        'Senior': '🐦'
+    }
+};
+
+// ========== DIFFICULTY SETTINGS ==========
+const DIFFICULTY_SETTINGS = {
+    easy: {
+        hungerRate: 1,
+        energyRate: 0.5,
+        happinessRate: 0.5,
+        cleanlinessRate: 0.25,
+        healthDamage: 2
+    },
+    normal: {
+        hungerRate: 2,
+        energyRate: 1,
+        happinessRate: 1,
+        cleanlinessRate: 0.5,
+        healthDamage: 3
+    },
+    hard: {
+        hungerRate: 3,
+        energyRate: 1.5,
+        happinessRate: 1.5,
+        cleanlinessRate: 1,
+        healthDamage: 4
+    }
+};
+
+// Default to normal, will be set by user
+let currentDifficulty = DIFFICULTY_SETTINGS.normal;
+
+// ADDED: Game state tracking
+let gameOver = false;
+
+// Step 3: Track Which Life Stage Was Last Logged
+let lastLoggedStage = 'Baby';
+
 let money = 10;
 
 // Track expenses by category
@@ -56,6 +142,81 @@ let expenses = {
     entertainment: 0
 };
 
+
+// Step 4: Get Emoji for Pet's Current Type and Life Stage
+function getPetStageEmoji() {
+    const currentStage = getPetLifeStage();
+    const petTypeVal = petType.value;
+    
+    const emoji = petStageEmojis[petTypeVal] && petStageEmojis[petTypeVal][currentStage.label];
+    
+    return emoji || '🐾';
+}
+
+// Step 6: Check if pet moved to new life stage and log milestone
+function checkLifeStageMilestone() {
+    const currentStage = getPetLifeStage();
+    if (currentStage.label !== lastLoggedStage) {
+        lastLoggedStage = currentStage.label;
+        log(`🎉 Your pet is now a ${currentStage.label}!`);
+    }
+}
+
+// Step 7: Check if pet has passed away
+function checkPetHealth() {
+    // Pet passes away if very old AND very unhealthy
+    if (age >= 100 && health <= 10 && !gameOver) {
+        gameOver = true;  // ADDED: Set flag to true ONCE
+        
+        // ADDED: Stop decay timer
+        if (window.gameDecayInterval) {
+            clearInterval(window.gameDecayInterval);
+            window.gameDecayInterval = null;
+        }
+        
+        // Disable all action buttons (get fresh references)
+        const feedBtn = document.getElementById("feedBtn");
+        const playBtn = document.getElementById("playBtn");
+        const restBtn = document.getElementById("restBtn");
+        const cleanBtn = document.getElementById("cleanBtn");
+        const vetBtn = document.getElementById("vetBtn");
+        const choresBtn = document.getElementById("choresBtn");
+        
+        if (feedBtn) feedBtn.disabled = true;
+        if (playBtn) playBtn.disabled = true;
+        if (restBtn) restBtn.disabled = true;
+        if (cleanBtn) cleanBtn.disabled = true;
+        if (vetBtn) vetBtn.disabled = true;
+        if (choresBtn) choresBtn.disabled = true;
+        
+        // ADDED: Display tombstone emoji when pet dies
+        const petEmojiEl = document.getElementById('petEmoji');
+        if (petEmojiEl) {
+            petEmojiEl.innerHTML = '<p style="font-size: 80px; margin: 5px 0;">🪦</p>';
+        }
+        
+        // ADDED: Update pet display info when pet dies
+        const petTypeDisplay = document.getElementById('petTypeDisplay');
+        const petStatusEl = document.getElementById('petStatus');
+        const emotionEmojiEl = document.getElementById('emotionEmoji');
+        
+        if (petTypeDisplay) {
+            petTypeDisplay.textContent = `${petType.value} (Deceased)`;
+        }
+        
+        // Convert age from days to years
+        const ageInYears = (age / 365).toFixed(1);
+        if (petStatusEl) {
+            petStatusEl.textContent = `Lived for ${age} days (${ageInYears} years)`;
+        }
+        
+        if (emotionEmojiEl) {
+            emotionEmojiEl.textContent = '🕊️';
+        }
+        
+        log('😢 Your beloved pet has passed away. Game Over.');
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     playButton.onclick = function() {
@@ -78,6 +239,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Refresh stats and reaction
                 updateStats();
+
+                // ADDED: Start passive decay timer for continued game
+                const decayInterval = setInterval(applyPassiveDecay, 5000);
+                window.gameDecayInterval = decayInterval;
             } else {
                 // Ensure inputs remain blank when not continuing
                 userName.value = '';
@@ -110,6 +275,9 @@ document.addEventListener('DOMContentLoaded', function() {
         userNameDisplay.textContent = "Hello, " + userName.value.trim();
         petNameDisplay.textContent = petName.value.trim();
 
+        // ADDED: Set difficulty based on user selection
+        currentDifficulty = DIFFICULTY_SETTINGS[document.getElementById('difficulty').value];
+
         let percent = Math.floor((money / parseFloat(savingsGoal.value)) * 100);
         moneySaved.textContent = "Money saved: $" + money;
         goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
@@ -124,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         energyStats.textContent = "Energy: " + energy + "%";
         cleanlinessStats.textContent = "Cleanliness: " + cleanliness + "%";
         healthStats.textContent = "Health: " + health + "%";
-        ageStats.textContent = "Age: " + age + " years";
+        ageStats.textContent = "Age: " + age + " days";
 
         updatePetReaction();
 
@@ -144,6 +312,44 @@ document.addEventListener('DOMContentLoaded', function() {
     let vetBtn = document.getElementById("vetBtn");
     let choresBtn = document.getElementById("choresBtn");
     let logArea = document.getElementById("logArea");
+
+    // ADDED: Help screen functionality
+    let helpFromPlayBtn = document.getElementById('helpFromPlayBtn');
+    let helpFromGameBtn = document.getElementById('helpFromGameBtn');
+    let closeHelpBtn = document.getElementById('closeHelpBtn');
+    let helpReturnTo = 'play';
+
+    if (helpFromPlayBtn) {
+        helpFromPlayBtn.onclick = function() {
+            helpReturnTo = 'play';
+            play.classList.add('hide');
+            help.classList.remove('hide');
+            help.classList.add('show');
+        };
+    }
+
+    if (helpFromGameBtn) {
+        helpFromGameBtn.onclick = function() {
+            helpReturnTo = 'game';
+            game.classList.add('hide');
+            help.classList.remove('hide');
+            help.classList.add('show');
+        };
+    }
+
+    if (closeHelpBtn) {
+        closeHelpBtn.onclick = function() {
+            help.classList.remove('show');
+            help.classList.add('hide');
+            if (helpReturnTo === 'play') {
+                play.classList.remove('hide');
+                play.classList.add('show');
+            } else {
+                game.classList.remove('hide');
+                game.classList.add('show');
+            }
+        };
+    }
 
     // Wire up action buttons
     if (feedBtn) {
@@ -332,6 +538,7 @@ function validateInputs() {
 }
 
 // ----------------------------- PERSISTENCE (localStorage) -----------------------
+// Step 10: Save lastLoggedStage to persistence
 function saveGame() {
     const gameState = {
         userName: userName.value,
@@ -345,6 +552,8 @@ function saveGame() {
         cleanliness: cleanliness,
         health: health,
         age: age,
+        lastLoggedStage: lastLoggedStage,
+        difficulty: document.getElementById('difficulty').value,  // ADDED: Save difficulty setting
         expenses: expenses
     };
     try {
@@ -367,6 +576,7 @@ function loadGame() {
 }
 
 // Reset the game to initial state and clear persistence
+// Step 12: Reset age and milestone tracking
 function resetGame() {
     const sure = confirm('Reset the game and delete saved progress?');
     if (!sure) return;
@@ -381,7 +591,9 @@ function resetGame() {
     energy = 100;
     cleanliness = 100;
     health = 100;
-    age = 0;
+    age = 0;  // RESET AGE
+    lastLoggedStage = 'Baby';  // RESET MILESTONE (Capital B)
+    gameOver = false;  // ADDED: Reset game over flag
     
     // Reset expenses
     expenses = {
@@ -401,14 +613,29 @@ function resetGame() {
     document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
     document.querySelectorAll('.error-msg').forEach(el => el.textContent = '');
 
-    // 5) Clear log and reset dynamic button labels if needed
+    // 5) Clear log and re-enable all buttons
+    const logArea = document.getElementById("logArea");
     if (logArea) logArea.innerHTML = '';
-    if (typeof choresBtn !== 'undefined' && choresBtn) {
+    
+    // Re-enable all action buttons (get fresh references)
+    const feedBtn = document.getElementById("feedBtn");
+    const playBtn = document.getElementById("playBtn");
+    const restBtn = document.getElementById("restBtn");
+    const cleanBtn = document.getElementById("cleanBtn");
+    const vetBtn = document.getElementById("vetBtn");
+    const choresBtn = document.getElementById("choresBtn");
+    
+    if (feedBtn) feedBtn.disabled = false;
+    if (playBtn) playBtn.disabled = false;
+    if (restBtn) restBtn.disabled = false;
+    if (cleanBtn) cleanBtn.disabled = false;
+    if (vetBtn) vetBtn.disabled = false;
+    if (choresBtn) {
         choresBtn.disabled = false;
         choresBtn.textContent = 'Chores (+$10)';
     }
 
-    // Optionally reset reaction panel visuals
+    // 6) Reset pet reaction display
     const petReactionDiv = document.getElementById('petReaction');
     if (petReactionDiv) {
         petReactionDiv.className = '';
@@ -435,23 +662,31 @@ function resetGame() {
 }
 
 // ----------------------------- PASSIVE STAT DECAY -----------------------
+// Step 8: Age increments every decay cycle
 function applyPassiveDecay() {
+    // ADDED: Don't decay stats if game is over
+    if (gameOver) return;
+    
+    // CHANGED: Use difficulty settings for stat degradation rates
     // Hunger increases naturally over time (pet gets hungrier)
-    hunger = Math.min(100, hunger + 2);
+    hunger = Math.min(100, hunger + currentDifficulty.hungerRate);
 
     // Energy slightly decreases (pet gets tired)
-    energy = Math.max(0, energy - 1);
+    energy = Math.max(0, energy - currentDifficulty.energyRate);
 
     // Happiness slightly decreases if not interacting (pet gets bored)
-    happiness = Math.max(0, happiness - 1);
+    happiness = Math.max(0, happiness - currentDifficulty.happinessRate);
 
     // Cleanliness decreases slowly (pet gets dirty)
-    cleanliness = Math.max(0, cleanliness - 0.5);
+    cleanliness = Math.max(0, cleanliness - currentDifficulty.cleanlinessRate);
 
     // Health decreases if conditions are bad (consequences for neglect)
     if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
-        health = Math.max(0, health - 3);
+        health = Math.max(0, health - currentDifficulty.healthDamage);
     }
+
+    // Increment age (1 day per decay cycle, every 5 seconds)
+    age += 1;
 
     // Update UI and check emotions
     updateStats();
@@ -498,6 +733,7 @@ function hideReport() {
 }
 
 // Apply a previously loaded state to inputs and stats
+// Step 11: Restore lastLoggedStage
 function applyLoadedState(s) {
     // Inputs
     userName.value = s.userName || '';
@@ -513,6 +749,8 @@ function applyLoadedState(s) {
     cleanliness = typeof s.cleanliness === 'number' ? s.cleanliness : 100;
     health = typeof s.health === 'number' ? s.health : 100;
     age = typeof s.age === 'number' ? s.age : 0;
+    // ADDED: Restore milestone tracking (Capital B for 'Baby')
+    lastLoggedStage = typeof s.lastLoggedStage === 'string' ? s.lastLoggedStage : 'Baby';
     
     // Restore expenses
     if (s.expenses) {
@@ -520,6 +758,13 @@ function applyLoadedState(s) {
         expenses.healthcare = s.expenses.healthcare || 0;
         expenses.hygiene = s.expenses.hygiene || 0;
         expenses.entertainment = s.expenses.entertainment || 0;
+    }
+
+    // ADDED: Restore difficulty setting
+    const difficultyDropdown = document.getElementById('difficulty');
+    if (difficultyDropdown && s.difficulty) {
+        difficultyDropdown.value = s.difficulty;
+        currentDifficulty = DIFFICULTY_SETTINGS[s.difficulty];
     }
 }
 
@@ -546,6 +791,7 @@ function getPetEmotion() {
     return { emotion: 'neutral', emoji: '🙂', status: 'Your pet is okay.' };
 }
 
+// Step 5: Updated to use stage-specific emoji
 function updatePetReaction() {
     const petReactionDiv = document.getElementById('petReaction');
     const petEmojiEl = document.getElementById('petEmoji');
@@ -556,14 +802,21 @@ function updatePetReaction() {
     if (!petReactionDiv) return;
 
     const reaction = getPetEmotion();
+    const lifeStage = getPetLifeStage();
 
-    // Set pet type emoji (big)
-    petEmojiEl.textContent = petEmojis[petType.value] || '🐾';
-    // Set emotion emoji (badge)
+    // CHANGED: Display pet - use image for dog, emoji for others
+    let petImagePath = getPetStageEmoji();
+    if (petImagePath.endsWith('.png')) {
+        // It's an image path, display as img tag
+        petEmojiEl.innerHTML = `<img src="${petImagePath}" alt="Pet Image" style="width: 150px; height: 150px; object-fit: contain;">`;
+    } else {
+        // It's an emoji, display as text
+        petEmojiEl.textContent = petImagePath;
+    }
+    
     emotionEmojiEl.textContent = reaction.emoji;
-    // Set pet type text
-    petTypeDisplay.textContent = petType.value;
-    // Set status message
+    // CHANGED: Now shows pet type + life stage
+    petTypeDisplay.textContent = `${petType.value} (${lifeStage.label})`;
     petStatusEl.textContent = reaction.status;
 
     // Reset and apply emotion class for background color
@@ -572,14 +825,15 @@ function updatePetReaction() {
 }
 
 // ----------------------------- UPDATE ALL STATS ON SCREEN -----------------------
-
+// Step 9: Updated to call milestone and health checks
 function updateStats() {
     hungerStats.textContent = "Hunger: " + hunger + "%";
     happinessStats.textContent = "Happiness: " + happiness + "%";
     energyStats.textContent = "Energy: " + energy + "%";
     cleanlinessStats.textContent = "Cleanliness: " + cleanliness + "%";
     healthStats.textContent = "Health: " + health + "%";
-    ageStats.textContent = "Age: " + age + " years";
+    // CHANGED: Display age in days instead of years
+    ageStats.textContent = "Age: " + age + " days";
     
     
     let percent = Math.floor((money / parseInt(savingsGoal.value)) * 100);
@@ -590,6 +844,12 @@ function updateStats() {
 
     // Persist state after each stats refresh
     saveGame();
+    
+    // CHANGED: Check for life stage milestones and pet health only if game is active
+    if (!gameOver) {
+        checkLifeStageMilestone();
+        checkPetHealth();
+    }
 }
 
 function log(message) {
